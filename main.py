@@ -98,4 +98,4 @@ async def translate(ctx, *, args):
 
 
 
-client.run('OTYwOTUwMjIzODQzMjM3OTM5.Ykx4og.3C2MvkbeGYyub8K_e7u6_ZdWCj4')
+client.run('token')
