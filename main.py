@@ -62,8 +62,10 @@ async def add(ctx, arg1, arg2):
 @client.command()
 async def define(ctx, *, args):
     definition_view = dictionary.meaning(args)
+    embedFun = discord.Embed(title="Word: {}".format(args), color=0x336EFF)
+    embedFun.add_field(name=args, value=definition_view, inline=False)
     try:
-        await ctx.send(definition_view)
+        await ctx.send(embed=embedFun)
     except:
         await ctx.send("There was an error.")
     finally:
@@ -139,7 +141,7 @@ async def translate_list(ctx):
 
 @client.command(aliases=['urban-all'])
 async def urban_all(ctx, *, args):
-    embedFun = discord.Embed(title="Word: {}".format(args), color=0x336EFF)
+    embedFun = discord.Embed(title="Word(s): {}".format(args), color=0x336EFF)
     defs = udclient.get_definition(str(args))
     index = 0
     for item in defs: # Python's `for` loop is a for-each.
@@ -149,7 +151,7 @@ async def urban_all(ctx, *, args):
 
 @client.command()
 async def urban(ctx, *, args):
-    embedFun = discord.Embed(title="Word: {}".format(args), color=0x336EFF)
+    embedFun = discord.Embed(title="Word(s): {}".format(args), color=0x336EFF)
     defs = udclient.get_definition(str(args))
     index = 0
     for item in defs: # Python's `for` loop is a for-each.
