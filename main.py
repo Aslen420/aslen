@@ -1,4 +1,5 @@
 from discord.ext import commands
+from discord.ext.commands import has_permissions
 import discord
 from PyDictionary import PyDictionary
 from http_exceptions import ClientException
@@ -21,6 +22,23 @@ client = commands.Bot(
 async def on_ready():
     print("Client is now active.")
 
+@client.command(pass_context=True)
+@commands.has_permissions(ban_members=True)
+async def ban(ctx, member: discord.Member, *, reason=None):        
+    await ctx.guild.ban(member)
+    await ctx.send('**{0}** has been banned.'.format(str(member)))
+
+@client.command()
+@commands.has_permissions(ban_members=True)
+async def unban(ctx, user_id : int):
+    user = await client.fetch_user(user_id)
+    await ctx.guild.unban(user)
+    await ctx.sendit client.fetch_user(user_id)
+    await ctx._context=True)
+@commands.has_permissions(kick_members=True)
+async def kick(ctx, member: discord.Member, *, reason=None):        
+    await ctx.guild.kick(member)
+    await ctx.send('**{0}** has been kicked.'.format(str(member)))
 
 @client.command()
 async def servers(guild):
