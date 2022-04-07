@@ -137,23 +137,28 @@ async def country(ctx, arg1, arg2):
 async def translate_list(ctx):
     await ctx.send("french, latin, russian, german, arabic, english")
 
-
 @client.command(aliases=['urban-all'])
 async def urban_all(ctx, *, args):
+    embedFun = discord.Embed(title="Word: {}".format(args), color=0x336EFF)
     defs = udclient.get_definition(str(args))
     index = 0
     for item in defs: # Python's `for` loop is a for-each.
-        await ctx.send("```Definition: {}```".format(item.definition))    # or whatever function of that item.
+        embedFun.add_field(name=args, value=item.definition, inline=False)
+    await ctx.send(embed=embedFun)
+
 
 @client.command()
 async def urban(ctx, *, args):
+    embedFun = discord.Embed(title="Word: {}".format(args), color=0x336EFF)
     defs = udclient.get_definition(str(args))
     index = 0
     for item in defs: # Python's `for` loop is a for-each.
-        await ctx.send("```Definition: {}```".format(item.definition))    # or whatever function of that item.
+        embedFun.add_field(name=args, value=item.definition, inline=False)    # or whatever function of that item.
+        await ctx.send(embed=embedFun)
         index += 1
         if index == 1:
             break    
         break
+    
 
-client.run('token')
+client.run('OTYxMDc4MjU4NjYzODIxMzIy.Ykzv4A.6jLDtLyh_76XzpMTPhv9e4t1VqE')
