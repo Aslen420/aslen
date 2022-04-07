@@ -5,10 +5,13 @@ from http_exceptions import ClientException
 from deep_translator import GoogleTranslator
 from countryinfo import CountryInfo
 import country_converter as coco
+from udpy import UrbanClient
 cc_all = coco.CountryConverter(include_obsolete=True)
 
 
 dictionary=PyDictionary()
+
+udclient = UrbanClient()
 
 client = commands.Bot(
     command_prefix='$', help_command=None, status=discord.Status.dnd, activity=discord.Activity(type=discord.ActivityType.watching, name="$help")
@@ -17,6 +20,7 @@ client = commands.Bot(
 @client.event
 async def on_ready():
     print("Client is now active.")
+
 
 @client.command()
 async def servers(guild):
@@ -35,12 +39,16 @@ async def feature_request(ctx, *, args):
 
 @client.command()
 async def help(ctx):
-    await ctx.send("$add : Addition Command - Two Arguments")
-    await ctx.send("$definition : Grab the definition of a word.")
-    await ctx.send("$translate : Translate a message into a selected language!")
-    await ctx.send("$feature_request : Request a feature to be added")
-    await ctx.send("$serverlist : Show the amount of servers the bot is in")
-    await ctx.send("$country : Grab different information about specified countries")
+        embedVar = discord.Embed(title="Help - Commands", description="List of commands for Aslen Bot!", color=0x336EFF)
+        embedVar.add_field(name="$add :", value="Addition Command - Two Arguments", inline=False)
+        embedVar.add_field(name="$define :", value="Grab the definition of a word", inline=False)
+        embedVar.add_field(name="$translate :", value="Translate a message into a selected language!", inline=False)
+        embedVar.add_field(name="$feature_request :", value="Request a feature to be added", inline=False)
+        embedVar.add_field(name="$serverlist :", value="Show the amount of servers the bot is in", inline=False)
+        embedVar.add_field(name="$country :", value="Grab different information about specified countries", inline=False)
+        embedVar.add_field(name="$urban :", value="Grab the urban dictionary definition of specified words | use $urban-all to show all results", inline=False)
+        await ctx.send(embed=embedVar)
+
 
 @client.command()
 async def add(ctx, arg1, arg2):
@@ -52,7 +60,7 @@ async def add(ctx, arg1, arg2):
         await ctx.send(total)
 
 @client.command()
-async def definition(ctx, *, args):
+async def define(ctx, *, args):
     definition_view = dictionary.meaning(args)
     try:
         await ctx.send(definition_view)
@@ -69,7 +77,7 @@ async def serverlist(ctx):
 async def translate(ctx, *, args):
     def check(message: discord.Message):
         return message.channel == ctx.channel and message.author != ctx.me
-    await ctx.send("What language would you like to translate to? type 'list' for all languages.")
+    await ctx.send("What language would you like to translate to? Use $translate-list for all languages.")
     lang = await client.wait_for("message", check=check)
     
     langformat = format(lang.content)
@@ -91,8 +99,6 @@ async def translate(ctx, *, args):
     elif langformat == "english":
         lang = GoogleTranslator(source='auto', target='en').translate(args)
         await ctx.send(lang)
-    elif langformat == "list":
-        await ctx.send("french, latin, russian, german, arabic, english")
     else:
         await ctx.send("Incorrect usage.")
 
@@ -111,7 +117,7 @@ async def country(ctx, arg1, arg2):
         await ctx.send(new_lst)
     elif  arg2 == "borders":
         countrymod = country.borders() 
-        countryfin = cc_all.convert(countrymod, to='name_short')
+        countryfin = cc_all.convert(countrymod, to='name')
         new_lst=(', '.join(countryfin)) 
         await ctx.send(new_lst)
     elif arg2 == "provinces":
@@ -127,5 +133,27 @@ async def country(ctx, arg1, arg2):
     else:
         pass
 
+@client.command(aliases=['translate-list'])
+async def translate_list(ctx):
+    await ctx.send("french, latin, russian, german, arabic, english")
+
+
+@client.command(aliases=['urban-all'])
+async def urban_all(ctx, *, args):
+    defs = udclient.get_definition(str(args))
+    index = 0
+    for item in defs: # Python's `for` loop is a for-each.
+        await ctx.send("```Definition: {}```".format(item.definition))    # or whatever function of that item.
+
+@client.command()
+async def urban(ctx, *, args):
+    defs = udclient.get_definition(str(args))
+    index = 0
+    for item in defs: # Python's `for` loop is a for-each.
+        await ctx.send("```Definition: {}```".format(item.definition))    # or whatever function of that item.
+        index += 1
+        if index == 1:
+            break    
+        break
 
 client.run('token')
