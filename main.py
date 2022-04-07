@@ -3,6 +3,10 @@ import discord
 from PyDictionary import PyDictionary
 from http_exceptions import ClientException
 from deep_translator import GoogleTranslator
+from countryinfo import CountryInfo
+import country_converter as coco
+cc_all = coco.CountryConverter(include_obsolete=True)
+
 
 dictionary=PyDictionary()
 
@@ -10,36 +14,32 @@ client = commands.Bot(
     command_prefix='$', help_command=None, status=discord.Status.dnd, activity=discord.Activity(type=discord.ActivityType.watching, name="$help")
 )
 
-
 @client.event
 async def on_ready():
     print("Client is now active.")
 
-@client.event # CURRENTLY NOT WORKING
-async def on_guild_join(guild):
-    channel = client.get_channel(961053064150810675) #channel id here
-    await channel.send("```Joined Guild Name : {}\nGuild ID : {}```", member.guild.id, member.guild.name)
 @client.command()
 async def servers(guild):
-    channel = client.get_channel(961056847199092746)
+    channel = client.get_channel(961080126232215592)
     activeservers = client.guilds
     for guild in activeservers:
         await channel.send("```{}```".format(guild.name))
+        await channel.send("```{}```".format(guild.id))
         print(guild.name)
     await channel.send("***LIST COMPLETE ^ -----------------------------------------***")
 
 @client.command()
 async def feature_request(ctx, *, args):
-    channel = client.get_channel(961050242604740629) #channel id here
+    channel = client.get_channel(961080191294255144) #channel id here
     await channel.send("Recommendation : \n```{}```".format(args))
 
-    
 @client.command()
 async def help(ctx):
     await ctx.send("$add : Addition Command - Two Arguments")
     await ctx.send("$definition : Grab the definition of a word.")
     await ctx.send("$translate : Translate a message into a selected language!")
-
+    await ctx.send("$feature_request : Request a feature to be added")
+    await ctx.send("$serverlist : Show the amount of servers the bot is in")
 
 @client.command()
 async def add(ctx, arg1, arg2):
@@ -51,7 +51,7 @@ async def add(ctx, arg1, arg2):
         await ctx.send(total)
 
 @client.command()
-async def definition(ctx, arg):
+async def definition(ctx, *, args):
     definition_view = dictionary.meaning(arg)
     try:
         await ctx.send(definition_view)
@@ -95,7 +95,36 @@ async def translate(ctx, *, args):
     else:
         await ctx.send("Incorrect usage.")
 
-
+@client.command()
+async def country(ctx, arg1, arg2):
+    country = CountryInfo(arg1)
+    if arg1 == "help":
+        await ctx.send("usage: $country country option")
+        await ctx.send("option 1: borders")
+        await ctx.send("option 2: provinces")
+        await ctx.send("option 3: capital")
+        await ctx.send("option 4: area (shows the area in km²)")
+        await ctx.send("option 5: languages")
+    elif arg2 == "languages":
+        countrymod = country.languages()
+        new_lst=(', '.join(countrymod)) 
+        await ctx.send(new_lst)
+    elif  arg2 == "borders":
+        countrymod = country.borders() 
+        countryfin = cc_all.convert(countrymod, to='name_short')
+        await ctx.send(countryfin)
+    elif arg2 == "provinces":
+        countrymod = country.provinces()
+        new_lst=(', '.join(countrymod)) 
+        await ctx.send(new_lst)
+    elif arg2 == "area":
+        countrymod = country.area()
+        await ctx.send("{} km²".format(countrymod))
+    elif  arg2 == "capital":
+        countrymod = country.capital()
+        await ctx.send(countrymod)
+    else:
+        await ctx.send("Type $country help for more information")
 
 
 client.run('token')
