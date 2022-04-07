@@ -40,6 +40,7 @@ async def help(ctx):
     await ctx.send("$translate : Translate a message into a selected language!")
     await ctx.send("$feature_request : Request a feature to be added")
     await ctx.send("$serverlist : Show the amount of servers the bot is in")
+    await ctx.send("$country : Grab different information about specified countries")
 
 @client.command()
 async def add(ctx, arg1, arg2):
@@ -52,7 +53,7 @@ async def add(ctx, arg1, arg2):
 
 @client.command()
 async def definition(ctx, *, args):
-    definition_view = dictionary.meaning(arg)
+    definition_view = dictionary.meaning(args)
     try:
         await ctx.send(definition_view)
     except:
@@ -98,13 +99,12 @@ async def translate(ctx, *, args):
 @client.command()
 async def country(ctx, arg1, arg2):
     country = CountryInfo(arg1)
-    if arg1 == "help":
-        await ctx.send("usage: $country country option")
-        await ctx.send("option 1: borders")
-        await ctx.send("option 2: provinces")
-        await ctx.send("option 3: capital")
-        await ctx.send("option 4: area (shows the area in km²)")
-        await ctx.send("option 5: languages")
+    if arg2 == "population":
+        countrymod = country.population()
+        await ctx.send(countrymod)
+    elif arg2 == "region":
+        countrymod = country.region()
+        await ctx.send(countrymod)
     elif arg2 == "languages":
         countrymod = country.languages()
         new_lst=(', '.join(countrymod)) 
@@ -112,7 +112,8 @@ async def country(ctx, arg1, arg2):
     elif  arg2 == "borders":
         countrymod = country.borders() 
         countryfin = cc_all.convert(countrymod, to='name_short')
-        await ctx.send(countryfin)
+        new_lst=(', '.join(countryfin)) 
+        await ctx.send(new_lst)
     elif arg2 == "provinces":
         countrymod = country.provinces()
         new_lst=(', '.join(countrymod)) 
@@ -124,7 +125,7 @@ async def country(ctx, arg1, arg2):
         countrymod = country.capital()
         await ctx.send(countrymod)
     else:
-        await ctx.send("Type $country help for more information")
+        pass
 
 
 client.run('token')
