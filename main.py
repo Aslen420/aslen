@@ -161,4 +161,4 @@ async def urban(ctx, *, args):
         break
     
 
-client.run('OTYxMDc4MjU4NjYzODIxMzIy.Ykzv4A.6jLDtLyh_76XzpMTPhv9e4t1VqE')
+client.run('token')
