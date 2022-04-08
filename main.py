@@ -7,13 +7,13 @@ from deep_translator import GoogleTranslator
 from countryinfo import CountryInfo
 import country_converter as coco
 from udpy import UrbanClient
+import os
+import sys
+import subprocess
+
 cc_all = coco.CountryConverter(include_obsolete=True)
-
-
 dictionary=PyDictionary()
-
 udclient = UrbanClient()
-
 client = commands.Bot(
     command_prefix='$', help_command=None, status=discord.Status.dnd, activity=discord.Activity(type=discord.ActivityType.watching, name="$help")
 )
@@ -21,25 +21,21 @@ client = commands.Bot(
 @client.event
 async def on_ready():
     print("Client is now active.")
-
 @client.command(pass_context=True)
 @commands.has_permissions(ban_members=True)
 async def ban(ctx, member: discord.Member, *, reason=None):        
     await ctx.guild.ban(member)
     await ctx.send('**{0}** has been banned.'.format(str(member)))
-
-@client.command()
+@client.command(pass_context=True)
 @commands.has_permissions(ban_members=True)
-async def unban(ctx, user_id : int):
+async def unban(ctx, *, user_id : int):
     user = await client.fetch_user(user_id)
     await ctx.guild.unban(user)
-    await ctx.sendit client.fetch_user(user_id)
-    await ctx._context=True)
+    await ctx.send("**{0}** has been unbanned.".format(str(user)))
 @commands.has_permissions(kick_members=True)
 async def kick(ctx, member: discord.Member, *, reason=None):        
     await ctx.guild.kick(member)
     await ctx.send('**{0}** has been kicked.'.format(str(member)))
-
 @client.command()
 async def servers(guild):
     channel = client.get_channel(961080126232215592)
@@ -49,12 +45,10 @@ async def servers(guild):
         await channel.send("```{}```".format(guild.id))
         print(guild.name)
     await channel.send("***LIST COMPLETE ^ -----------------------------------------***")
-
 @client.command()
 async def feature_request(ctx, *, args):
     channel = client.get_channel(961080191294255144) #channel id here
     await channel.send("Recommendation : \n```{}```".format(args))
-
 @client.command()
 async def help(ctx):
         embedVar = discord.Embed(title="Help - Commands", description="List of commands for Aslen Bot!", color=0x336EFF)
@@ -66,8 +60,6 @@ async def help(ctx):
         embedVar.add_field(name="$country :", value="Grab different information about specified countries", inline=False)
         embedVar.add_field(name="$urban :", value="Grab the urban dictionary definition of specified words | use $urban-all to show all results", inline=False)
         await ctx.send(embed=embedVar)
-
-
 @client.command()
 async def add(ctx, arg1, arg2):
     try:
@@ -76,7 +68,6 @@ async def add(ctx, arg1, arg2):
         await ctx.send("There was an error.")
     finally:
         await ctx.send(total)
-
 @client.command()
 async def define(ctx, *, args):
     definition_view = dictionary.meaning(args)
@@ -88,18 +79,15 @@ async def define(ctx, *, args):
         await ctx.send("There was an error.")
     finally:
         print("Test completed.")
-
 @client.command()
 async def serverlist(ctx):
     await ctx.send("I'm in " + str(len(client.guilds)) + " servers!")
-
 @client.command()
 async def translate(ctx, *, args):
     def check(message: discord.Message):
         return message.channel == ctx.channel and message.author != ctx.me
     await ctx.send("What language would you like to translate to? Use $translate-list for all languages.")
     lang = await client.wait_for("message", check=check)
-    
     langformat = format(lang.content)
     if langformat == "french":
         lang = GoogleTranslator(source='auto', target='fr').translate(args)
@@ -121,7 +109,15 @@ async def translate(ctx, *, args):
         await ctx.send(lang)
     else:
         await ctx.send("Incorrect usage.")
-
+@client.command()
+async def pause(ctx):
+    myID = 516366251484774401
+    altID = 949532007279525948
+    if ctx.message.author.id == myID or ctx.message.author.id == altID:
+        await ctx.send("Pausing event loop...")
+        pausing = input("Enter something to resume event loop : ")
+    else:
+        await ctx.send('You are not allowed to execute this command!')
 @client.command()
 async def country(ctx, arg1, arg2):
     country = CountryInfo(arg1)
@@ -152,11 +148,9 @@ async def country(ctx, arg1, arg2):
         await ctx.send(countrymod)
     else:
         pass
-
 @client.command(aliases=['translate-list'])
 async def translate_list(ctx):
     await ctx.send("french, latin, russian, german, arabic, english")
-
 @client.command(aliases=['urban-all'])
 async def urban_all(ctx, *, args):
     embedFun = discord.Embed(title="Word(s): {}".format(args), color=0x336EFF)
@@ -165,8 +159,6 @@ async def urban_all(ctx, *, args):
     for item in defs: # Python's `for` loop is a for-each.
         embedFun.add_field(name=args, value=item.definition, inline=False)
     await ctx.send(embed=embedFun)
-
-
 @client.command()
 async def urban(ctx, *, args):
     embedFun = discord.Embed(title="Word(s): {}".format(args), color=0x336EFF)
@@ -176,9 +168,15 @@ async def urban(ctx, *, args):
         embedFun.add_field(name=args, value=item.definition, inline=False)    # or whatever function of that item.
         await ctx.send(embed=embedFun)
         index += 1
-        if index == 1:
+        if index == 10:
             break    
         break
-    
+@client.command()
+async def restart(ctx):
+    await ctx.send("Restarting")
+    await subprocess.call([sys.executable, os.path.realpath(__file__)] + sys.argv[1:])
+
 
 client.run('token')
+
+
