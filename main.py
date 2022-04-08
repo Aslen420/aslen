@@ -2,7 +2,6 @@ from discord.ext import commands
 from discord.ext.commands import has_permissions
 import discord
 from PyDictionary import PyDictionary
-from http_exceptions import ClientException
 from deep_translator import GoogleTranslator
 from countryinfo import CountryInfo
 import country_converter as coco
