@@ -236,6 +236,6 @@ async def reload(ctx):
     subprocess.call([sys.executable, os.path.realpath(__file__)] + sys.argv[1:])
 
 
-client.run('OTYxMDc4MjU4NjYzODIxMzIy.Ykzv4A.6jLDtLyh_76XzpMTPhv9e4t1VqE')
+client.run('token')
 
 
