@@ -34,7 +34,7 @@ async def on_message_delete(message):
 async def on_ready():
     print("Client is now active.")
 
-@client.command(name = 'snipe')
+@client.command()
 async def snipe(ctx):
     channel = ctx.channel
     try: 
