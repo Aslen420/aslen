@@ -84,7 +84,12 @@ async def help(ctx):
         embedVar.add_field(name="$serverlist :", value="Show the amount of servers the bot is in", inline=False)
         embedVar.add_field(name="$country :", value="Grab different information about specified countries", inline=False)
         embedVar.add_field(name="$urban :", value="Grab the urban dictionary definition of specified words | use $urban-all to show all results", inline=False)
-        await ctx.send(embed=embedVar)
+        embedVar.add_field(name="$insult :", value="Sends an insult", inline=False)
+	embedVar.add_field(name="$joke :", value="Sends a joke", inline=False)
+	embedVar.add_field(name="$mkr :", value="Makes a given role", inline=False)
+	embedVar.add_field(name="$clean :", value="Deletes a specified amount of messages", inline=False)
+	embedVar.add_field(name="$urban / $urban-all :", value="Shows the definition(s) of a given string from the Urban Dictionary", inline=False)
+	await ctx.send(embed=embedVar)
 @client.command()
 async def joke(ctx):
     a = requests.get("https://v2.jokeapi.dev/joke/Dark?blacklistFlags=nsfw,political,racist&format=txt")
