@@ -1,4 +1,3 @@
-
 from discord.ext import commands
 from discord.ext.commands import has_permissions
 import discord
@@ -19,9 +18,32 @@ udclient = UrbanClient()
 client = commands.Bot(
     command_prefix='$', help_command=None, status=discord.Status.dnd, activity=discord.Activity(type=discord.ActivityType.watching, name="$help")
 )
+
+snipe_message_author = {}
+snipe_message_content = {}
+
+@client.event
+async def on_message_delete(message):
+     snipe_message_author[message.channel.id] = message.author
+     snipe_message_content[message.channel.id] = message.content
+     await sleep(60)
+     del snipe_message_author[message.channel.id]
+     del snipe_message_content[message.channel.id]
+
 @client.event
 async def on_ready():
     print("Client is now active.")
+
+@client.command(name = 'snipe')
+async def snipe(ctx):
+    channel = ctx.channel
+    try: 
+        em = discord.Embed(name = f"Last deleted message in #{channel.name}", description = snipe_message_content[channel.id])
+        em.set_footer(text = f"This message was sent by {snipe_message_author[channel.id]}")
+        await ctx.send(embed = em)
+    except KeyError: 
+        await ctx.send(f"There are no recently deleted messages in #{channel.name}")
+
 @client.command(pass_context=True)
 @commands.has_permissions(ban_members=True)
 async def ban(ctx, member: discord.Member, *, reason=None):        
@@ -49,7 +71,7 @@ async def servers(guild):
     await channel.send("***LIST COMPLETE ^ -----------------------------------------***")
 @client.command()
 async def feature_request(ctx, *, args):
-    channel = client.get_channel(961080191294255144) #channel id here
+    channel = client.get_channel(961080191294255144) 
     await channel.send("Recommendation : \n```{}```".format(args))
 @client.command()
 async def help(ctx):
@@ -62,6 +84,7 @@ async def help(ctx):
         embedVar.add_field(name="$country :", value="Grab different information about specified countries", inline=False)
         embedVar.add_field(name="$urban :", value="Grab the urban dictionary definition of specified words | use $urban-all to show all results", inline=False)
         await ctx.send(embed=embedVar)
+
 @client.command()
 async def mod_guzzle(ctx, *, args):
     member = ctx.author
@@ -200,7 +223,7 @@ async def urban_all(ctx, *, args):
     embedFun = discord.Embed(title="Word(s): {}".format(args), color=0x336EFF)
     defs = udclient.get_definition(str(args))
     index = 0
-    for item in defs: # Python's `for` loop is a for-each.
+    for item in defs: 
         embedFun.add_field(name=args, value=item.definition, inline=False)
     await ctx.send(embed=embedFun)
 @client.command()
@@ -208,8 +231,8 @@ async def urban(ctx, *, args):
     embedFun = discord.Embed(title="Word(s): {}".format(args), color=0x336EFF)
     defs = udclient.get_definition(str(args))
     index = 0
-    for item in defs: # Python's `for` loop is a for-each.
-        embedFun.add_field(name=args, value=item.definition, inline=False)    # or whatever function of that item.
+    for item in defs: 
+        embedFun.add_field(name=args, value=item.definition, inline=False)   
         await ctx.send(embed=embedFun)
         index += 1
         if index == 10:
