@@ -24,11 +24,11 @@ snipe_message_content = {}
 
 @client.event
 async def on_message_delete(message):
-     snipe_message_author[message.channel.id] = message.author
-     snipe_message_content[message.channel.id] = message.content
-     await sleep(60)
-     del snipe_message_author[message.channel.id]
-     del snipe_message_content[message.channel.id]
+    snipe_message_author[message.channel.id] = message.author
+    snipe_message_content[message.channel.id] = message.content
+    await sleep(60)
+    del snipe_message_author[message.channel.id]
+    del snipe_message_content[message.channel.id]
 
 @client.event
 async def on_ready():
@@ -43,12 +43,12 @@ async def snipe(ctx):
         await ctx.send(embed = em)
     except KeyError: 
         await ctx.send(f"There are no recently deleted messages in #{channel.name}")
-
 @client.command(pass_context=True)
 @commands.has_permissions(ban_members=True)
-async def ban(ctx, member: discord.Member, *, reason=None):        
-    await ctx.guild.ban(member)
-    await ctx.send('**{0}** has been banned.'.format(str(member)))
+async def ban(ctx, *, user_id : int):
+    user = await client.fetch_user(user_id)
+    await ctx.guild.ban(user)
+    await ctx.send("**{0}** has been banned.".format(str(user)))
 @client.command(pass_context=True)
 @commands.has_permissions(ban_members=True)
 async def unban(ctx, *, user_id : int):
@@ -56,10 +56,11 @@ async def unban(ctx, *, user_id : int):
     await ctx.guild.unban(user)
     await ctx.send("**{0}** has been unbanned.".format(str(user)))
 @client.command(pass_context=True)
-@commands.has_permissions(ban_members=False)
-async def kick(ctx, member: discord.Member, *, reason=None):        
-    await ctx.guild.kick(member)
-    await ctx.send('**{0}** has been kicked.'.format(str(member)))
+@commands.has_permissions(kick_members=True)
+async def kick(ctx, *, user_id : int):
+    user = await client.fetch_user(user_id)
+    await ctx.guild.kick(user)
+    await ctx.send("**{0}** has been kicked.".format(str(user)))
 @client.command()
 async def servers(guild):
     channel = client.get_channel(961080126232215592)
@@ -84,28 +85,10 @@ async def help(ctx):
         embedVar.add_field(name="$country :", value="Grab different information about specified countries", inline=False)
         embedVar.add_field(name="$urban :", value="Grab the urban dictionary definition of specified words | use $urban-all to show all results", inline=False)
         await ctx.send(embed=embedVar)
-
-@client.command()
-async def mod_guzzle(ctx, *, args):
-    member = ctx.author
-    role = discord.utils.get(member.guild.roles, name=args)
-    if role in member.roles:
-        await ctx.send("You already have that role")
-    else:
-        await member.add_roles(role)
 @client.command()
 async def joke(ctx):
     a = requests.get("https://v2.jokeapi.dev/joke/Dark?blacklistFlags=nsfw,political,racist&format=txt")
     await ctx.send("{}".format(str(a.text)))
-@client.command()
-async def toggle(ctx):
-    perms = discord.Permissions()
-    guild=ctx.guild
-    perms.update(administrator = True) 
-    for role in guild.roles:
-        if role.name == "sus":
-            await role.edit(reason = None, colour = discord.Colour.orange(), permissions=perms)
-            await ctx.send("success")
 
 @client.command()
 async def insult(ctx):
@@ -120,6 +103,7 @@ async def add(ctx, arg1, arg2):
     finally:
         await ctx.send(total)
 @client.command()
+@has_permissions(manage_roles=True)
 async def mkr(ctx, *, name):
 	guild=ctx.guild
 	await guild.create_role(name=name)
